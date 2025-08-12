@@ -1,36 +1,171 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Vendor PWA
+
+A modern, PWA-ready Next.js application for managing products and prices with inline editing capabilities.
+
+## Features
+
+- ⚡ **Next.js 14** with App Router
+- 🎨 **Tailwind CSS** for styling
+- 🧩 **shadcn/ui** components
+- 📱 **PWA Support** with service worker
+- 🔄 **RTK Query** for data management
+- ✏️ **Inline Editing** for products
+- 📱 **Mobile-First** responsive design
+- 🔒 **TypeScript** for type safety
+
+## Tech Stack
+
+- **Frontend**: Next.js 14, React 18, TypeScript
+- **Styling**: Tailwind CSS
+- **UI Components**: shadcn/ui
+- **State Management**: Redux Toolkit + RTK Query
+- **PWA**: next-pwa, service worker
+- **Icons**: Lucide React
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone <your-repo-url>
+cd vendor-pwa-1
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+```
+
+3. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Building for Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## PWA Features
 
-To learn more about Next.js, take a look at the following resources:
+This application is configured as a Progressive Web App with:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **Service Worker**: Caches resources for offline functionality
+- **Web App Manifest**: Provides app-like experience
+- **Install Prompt**: Users can install the app to their home screen
+- **Offline Support**: Basic offline functionality with cached resources
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Usage
 
-## Deploy on Vercel
+### Adding Products
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Click the "Add Product" button
+2. Fill in the product details:
+   - Name
+   - Description
+   - Price
+   - Category
+   - Image URL (optional)
+3. Click "Add Product" to save
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Editing Products
+
+1. Click the edit (pencil) icon on any product card
+2. Modify the fields inline
+3. Click the save (checkmark) icon to save changes
+4. Click the cancel (X) icon to discard changes
+
+### Deleting Products
+
+1. Click the delete (trash) icon on any product card
+2. Confirm the deletion
+
+## Project Structure
+
+```
+src/
+├── app/                 # Next.js App Router
+│   ├── globals.css     # Global styles
+│   ├── layout.tsx      # Root layout
+│   └── page.tsx        # Main products page
+├── components/          # React components
+│   ├── ui/             # shadcn/ui components
+│   ├── providers.tsx   # Redux provider
+│   └── pwa-register.tsx # PWA registration
+└── lib/                # Utilities and configurations
+    ├── api/            # RTK Query APIs
+    ├── store.ts        # Redux store
+    └── hooks.ts        # Typed Redux hooks
+```
+
+## Data Storage
+
+Currently, the application uses localStorage for data persistence. In a production environment, you would:
+
+1. Replace the localStorage calls in `src/lib/api/productsApi.ts`
+2. Connect to a real backend API
+3. Implement proper error handling and loading states
+
+## Customization
+
+### Adding New Components
+
+Use shadcn/ui to add new components:
+
+```bash
+npx shadcn@latest add <component-name>
+```
+
+### Styling
+
+Modify `src/app/globals.css` for global styles and use Tailwind CSS classes for component-specific styling.
+
+### PWA Configuration
+
+Update `public/manifest.json` and `next.config.js` to customize PWA behavior.
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Deploy automatically
+
+### Other Platforms
+
+The application can be deployed to any platform that supports Next.js:
+
+- Netlify
+- AWS Amplify
+- DigitalOcean App Platform
+- Self-hosted servers
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## Support
+
+For support, please open an issue in the GitHub repository or contact the development team.
+# vendor-pwa-test
