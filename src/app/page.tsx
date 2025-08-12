@@ -1,103 +1,389 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import { useState } from 'react'
+import {
+  useGetProductsQuery,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
+} from '@/lib/api/productsApi'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Plus, Edit, Trash2, Save, X } from 'lucide-react'
+
+export default function ProductsPage() {
+  const { data: products = [], isLoading, error } = useGetProductsQuery()
+  const [createProduct] = useCreateProductMutation()
+  const [updateProduct] = useUpdateProductMutation()
+  const [deleteProduct] = useDeleteProductMutation()
+
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editingProduct, setEditingProduct] = useState({
+    name: '',
+    description: '',
+    price: 0,
+    category: '',
+    imageUrl: '',
+  })
+
+  const [showForm, setShowForm] = useState(false)
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    description: '',
+    price: 0,
+    category: '',
+    imageUrl: '',
+  })
+
+  const handleEdit = (product: any) => {
+    setEditingId(product.id)
+    setEditingProduct({ ...product })
+  }
+
+  const handleSave = async () => {
+    if (editingId) {
+      await updateProduct({ id: editingId, ...editingProduct })
+      setEditingId(null)
+      setEditingProduct({
+        name: '',
+        description: '',
+        price: 0,
+        category: '',
+        imageUrl: '',
+      })
+    }
+  }
+
+  const handleCancel = () => {
+    setEditingId(null)
+    setEditingProduct({
+      name: '',
+      description: '',
+      price: 0,
+      category: '',
+      imageUrl: '',
+    })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    await createProduct(newProduct)
+    setNewProduct({
+      name: '',
+      description: '',
+      price: 0,
+      category: '',
+      imageUrl: '',
+    })
+    setShowForm(false)
+  }
+
+  const handleDelete = async (id: string) => {
+    if (confirm('Are you sure you want to delete this product?')) {
+      await deleteProduct(id)
+    }
+  }
+
+  if (isLoading)
+    return (
+      <div className='flex justify-center items-center min-h-screen'>
+        Loading...
+      </div>
+    )
+  if (error)
+    return (
+      <div className='flex justify-center items-center min-h-screen text-red-500'>
+        Error loading products
+      </div>
+    )
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className='container mx-auto px-4 py-8'>
+      <div className='flex justify-between items-center mb-8'>
+        <h1 className='text-3xl font-bold'>Products</h1>
+        <Button
+          onClick={() => setShowForm(!showForm)}
+          className='flex items-center gap-2'
+        >
+          <Plus className='w-4 h-4' />
+          Add Product
+        </Button>
+      </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Add Product Form */}
+      {showForm && (
+        <Card className='mb-8'>
+          <CardHeader>
+            <CardTitle>Add New Product</CardTitle>
+            <CardDescription>Fill in the product details below</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className='space-y-4'>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                <div>
+                  <label className='block text-sm font-medium mb-2'>Name</label>
+                  <Input
+                    value={newProduct.name}
+                    onChange={(e) =>
+                      setNewProduct({ ...newProduct, name: e.target.value })
+                    }
+                    placeholder='Product name'
+                    required
+                  />
+                </div>
+                <div>
+                  <label className='block text-sm font-medium mb-2'>
+                    Category
+                  </label>
+                  <Input
+                    value={newProduct.category}
+                    onChange={(e) =>
+                      setNewProduct({ ...newProduct, category: e.target.value })
+                    }
+                    placeholder='Product category'
+                    required
+                  />
+                </div>
+                <div>
+                  <label className='block text-sm font-medium mb-2'>
+                    Price
+                  </label>
+                  <Input
+                    type='number'
+                    step='0.01'
+                    value={newProduct.price}
+                    onChange={(e) =>
+                      setNewProduct({
+                        ...newProduct,
+                        price: parseFloat(e.target.value) || 0,
+                      })
+                    }
+                    placeholder='0.00'
+                    required
+                  />
+                </div>
+                <div>
+                  <label className='block text-sm font-medium mb-2'>
+                    Image URL
+                  </label>
+                  <Input
+                    value={newProduct.imageUrl}
+                    onChange={(e) =>
+                      setNewProduct({ ...newProduct, imageUrl: e.target.value })
+                    }
+                    placeholder='https://example.com/image.jpg'
+                  />
+                </div>
+              </div>
+              <div>
+                <label className='block text-sm font-medium mb-2'>
+                  Description
+                </label>
+                <Input
+                  value={newProduct.description}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      description: e.target.value,
+                    })
+                  }
+                  placeholder='Product description'
+                  required
+                />
+              </div>
+              <div className='flex gap-2'>
+                <Button type='submit'>Add Product</Button>
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => setShowForm(false)}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Products Grid */}
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+        {products.map((product) => (
+          <Card key={product.id} className='relative'>
+            <CardHeader>
+              <div className='flex justify-between items-start'>
+                <div>
+                  <CardTitle className='text-lg'>
+                    {editingId === product.id ? (
+                      <Input
+                        value={editingProduct.name}
+                        onChange={(e) =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            name: e.target.value,
+                          })
+                        }
+                        className='text-lg font-semibold'
+                      />
+                    ) : (
+                      product.name
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    {editingId === product.id ? (
+                      <Input
+                        value={editingProduct.category}
+                        onChange={(e) =>
+                          setEditingProduct({
+                            ...editingProduct,
+                            category: e.target.value,
+                          })
+                        }
+                        placeholder='Category'
+                      />
+                    ) : (
+                      product.category
+                    )}
+                  </CardDescription>
+                </div>
+                <div className='flex gap-2'>
+                  {editingId === product.id ? (
+                    <>
+                      <Button
+                        size='sm'
+                        onClick={handleSave}
+                        className='bg-green-600 hover:bg-green-700'
+                      >
+                        <Save className='w-4 h-4' />
+                      </Button>
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        onClick={handleCancel}
+                      >
+                        <X className='w-4 h-4' />
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        onClick={() => handleEdit(product)}
+                      >
+                        <Edit className='w-4 h-4' />
+                      </Button>
+                      <Button
+                        size='sm'
+                        variant='outline'
+                        onClick={() => handleDelete(product.id)}
+                        className='text-red-600 hover:text-red-700'
+                      >
+                        <Trash2 className='w-4 h-4' />
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {product.imageUrl && (
+                <div className='mb-4'>
+                  <img
+                    src={product.imageUrl}
+                    alt={product.name}
+                    className='w-full h-32 object-cover rounded-md'
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                    }}
+                  />
+                </div>
+              )}
+
+              <div className='space-y-3'>
+                <div>
+                  <label className='block text-sm font-medium mb-1'>
+                    Description
+                  </label>
+                  {editingId === product.id ? (
+                    <Input
+                      value={editingProduct.description}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          description: e.target.value,
+                        })
+                      }
+                      placeholder='Description'
+                    />
+                  ) : (
+                    <p className='text-sm text-gray-600'>
+                      {product.description}
+                    </p>
+                  )}
+                </div>
+
+                <div>
+                  <label className='block text-sm font-medium mb-1'>
+                    Price
+                  </label>
+                  {editingId === product.id ? (
+                    <Input
+                      type='number'
+                      step='0.01'
+                      value={editingProduct.price}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          price: parseFloat(e.target.value) || 0,
+                        })
+                      }
+                      placeholder='0.00'
+                    />
+                  ) : (
+                    <p className='text-lg font-semibold text-green-600'>
+                      ${product.price.toFixed(2)}
+                    </p>
+                  )}
+                </div>
+
+                {editingId === product.id && (
+                  <div>
+                    <label className='block text-sm font-medium mb-1'>
+                      Image URL
+                    </label>
+                    <Input
+                      value={editingProduct.imageUrl || ''}
+                      onChange={(e) =>
+                        setEditingProduct({
+                          ...editingProduct,
+                          imageUrl: e.target.value,
+                        })
+                      }
+                      placeholder='https://example.com/image.jpg'
+                    />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {products.length === 0 && (
+        <div className='text-center py-12'>
+          <p className='text-gray-500 text-lg'>
+            No products yet. Add your first product to get started!
+          </p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
     </div>
-  );
+  )
 }
