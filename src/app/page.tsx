@@ -6,6 +6,7 @@ import {
   useCreateProductMutation,
   useUpdateProductMutation,
   useDeleteProductMutation,
+  type Product,
 } from '@/lib/api/productsApi'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -17,6 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Plus, Edit, Trash2, Save, X } from 'lucide-react'
+import Image from 'next/image'
 
 export default function ProductsPage() {
   const { data: products = [], isLoading, error } = useGetProductsQuery()
@@ -25,13 +27,14 @@ export default function ProductsPage() {
   const [deleteProduct] = useDeleteProductMutation()
 
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editingProduct, setEditingProduct] = useState({
+  const [editingProduct, setEditingProduct] = useState<Omit<Product, 'id'>>({
     name: '',
     description: '',
     price: 0,
     category: '',
     imageUrl: '',
   })
+  const [hiddenImages, setHiddenImages] = useState<Set<string>>(new Set())
 
   const [showForm, setShowForm] = useState(false)
   const [newProduct, setNewProduct] = useState({
@@ -42,7 +45,7 @@ export default function ProductsPage() {
     imageUrl: '',
   })
 
-  const handleEdit = (product: any) => {
+  const handleEdit = (product: Product) => {
     setEditingId(product.id)
     setEditingProduct({ ...product })
   }
@@ -294,14 +297,16 @@ export default function ProductsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              {product.imageUrl && (
+              {product.imageUrl && !hiddenImages.has(product.id) && (
                 <div className='mb-4'>
-                  <img
+                  <Image
                     src={product.imageUrl}
                     alt={product.name}
+                    width={400}
+                    height={128}
                     className='w-full h-32 object-cover rounded-md'
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none'
+                    onError={() => {
+                      setHiddenImages((prev) => new Set(prev).add(product.id))
                     }}
                   />
                 </div>
